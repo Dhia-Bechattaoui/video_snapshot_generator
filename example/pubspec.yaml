@@ -1,0 +1,27 @@
+name: video_snapshot_generator_example
+description: Example application for video_snapshot_generator package.
+publish_to: 'none'
+
+version: 0.0.1+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  video_snapshot_generator:
+    path: ../
+  file_picker: ^10.0.0
+  cupertino_icons: ^1.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.0.0
+  mockito: ^5.0.0
+
+flutter:
+  uses-material-design: true
