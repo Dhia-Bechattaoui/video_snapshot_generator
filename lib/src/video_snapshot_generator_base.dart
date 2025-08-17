@@ -137,6 +137,9 @@ class VideoSnapshotGenerator {
       case ThumbnailFormat.webP:
         return cross_platform.ThumbnailFormat.webp;
     }
+    // This should never be reached as all enum values are covered
+    // ignore: dead_code
+    throw ArgumentError('Unsupported format: $format');
   }
 
   /// Converts cross_platform_video_thumbnails format back to our format
@@ -149,6 +152,9 @@ class VideoSnapshotGenerator {
       case cross_platform.ThumbnailFormat.webp:
         return 'WebP';
     }
+    // This should never be reached as all enum values are covered
+    // ignore: dead_code
+    throw ArgumentError('Unsupported format: $format');
   }
 
   /// Check if the platform supports the given video format
@@ -188,5 +194,8 @@ class VideoSnapshotGenerator {
       case cross_platform.ThumbnailFormat.webp:
         return ThumbnailFormat.webP;
     }
+    // This should never be reached as all enum values are covered
+    // ignore: dead_code
+    throw ArgumentError('Unsupported format: $format');
   }
 }
