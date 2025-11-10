@@ -3,8 +3,9 @@ import 'package:video_snapshot_generator/video_snapshot_generator.dart';
 
 void main() {
   group('VideoSnapshotGenerator Integration Tests', () {
-    testWidgets('should handle video frame extraction workflow',
-        (WidgetTester tester) async {
+    testWidgets('should handle video frame extraction workflow', (
+      WidgetTester tester,
+    ) async {
       // Test the complete workflow of creating options and extracting frames
 
       // Create thumbnail options
@@ -95,8 +96,9 @@ void main() {
       expect(copiedErrorResult.errorMessage, 'Permission denied');
     });
 
-    testWidgets('should handle different thumbnail formats',
-        (WidgetTester tester) async {
+    testWidgets('should handle different thumbnail formats', (
+      WidgetTester tester,
+    ) async {
       // Test JPEG format
       const jpegOptions = ThumbnailOptions(
         videoPath: '/test/video.mp4',
@@ -128,8 +130,9 @@ void main() {
       expect(ThumbnailFormat.webP.name, 'webP');
     });
 
-    testWidgets('should handle edge cases and boundary values',
-        (WidgetTester tester) async {
+    testWidgets('should handle edge cases and boundary values', (
+      WidgetTester tester,
+    ) async {
       // Test minimum values
       const minOptions = ThumbnailOptions(
         videoPath: '/test/video.mp4',
@@ -159,9 +162,7 @@ void main() {
       expect(maxOptions.timeMs, 999999);
 
       // Test default values
-      const defaultOptions = ThumbnailOptions(
-        videoPath: '/test/video.mp4',
-      );
+      const defaultOptions = ThumbnailOptions(videoPath: '/test/video.mp4');
 
       expect(defaultOptions.width, 320);
       expect(defaultOptions.height, 240);
@@ -178,10 +179,7 @@ void main() {
         height: 240,
       );
 
-      final copiedOptions = originalOptions.copyWith(
-        width: 640,
-        height: 480,
-      );
+      final copiedOptions = originalOptions.copyWith(width: 640, height: 480);
 
       // Original should remain unchanged
       expect(originalOptions.width, 320);
@@ -201,10 +199,7 @@ void main() {
         timeMs: 5000,
       );
 
-      final copiedResult = originalResult.copyWith(
-        width: 640,
-        height: 480,
-      );
+      final copiedResult = originalResult.copyWith(width: 640, height: 480);
 
       // Original should remain unchanged
       expect(originalResult.width, 320);

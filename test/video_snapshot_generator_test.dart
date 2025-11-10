@@ -4,9 +4,7 @@ import 'package:video_snapshot_generator/video_snapshot_generator.dart';
 void main() {
   group('VideoSnapshotGenerator Tests', () {
     test('should create ThumbnailOptions with default values', () {
-      const options = ThumbnailOptions(
-        videoPath: '/test/video.mp4',
-      );
+      const options = ThumbnailOptions(videoPath: '/test/video.mp4');
 
       expect(options.videoPath, '/test/video.mp4');
       expect(options.width, 320);
@@ -41,10 +39,7 @@ void main() {
         height: 240,
       );
 
-      final copied = original.copyWith(
-        width: 640,
-        quality: 90,
-      );
+      final copied = original.copyWith(width: 640, quality: 90);
 
       expect(copied.videoPath, '/test/video.mp4');
       expect(copied.width, 640);
@@ -99,10 +94,7 @@ void main() {
         timeMs: 5000,
       );
 
-      final copied = original.copyWith(
-        width: 640,
-        format: 'PNG',
-      );
+      final copied = original.copyWith(width: 640, format: 'PNG');
 
       expect(copied.path, '/output/thumbnail.jpg');
       expect(copied.width, 640);

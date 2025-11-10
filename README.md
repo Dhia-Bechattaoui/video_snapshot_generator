@@ -2,6 +2,8 @@
 
 A Flutter package for generating video snapshots and thumbnails with custom dimensions and quality settings. This package provides a simple and efficient way to generate thumbnails from video files in Flutter applications across all platforms.
 
+![Example](assets/example.gif)
+
 ## Features
 
 - 🎬 Extract frames from video files at specific time positions
@@ -26,7 +28,7 @@ Add this dependency to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  video_snapshot_generator: ^0.0.2
+  video_snapshot_generator: ^0.1.0
 ```
 
 Then run:
@@ -329,6 +331,35 @@ flutter test test/integration_test.dart
 # Generate test coverage report
 flutter test --coverage
 ```
+
+## DEVELOPMENT REQUIREMENTS
+
+### Quality Standards
+
+- **Pana score**: 160/160
+- **Flutter analyze**: 0 issues
+- **Dart analysis**: 0 issues
+- **Test coverage**: >90%
+- **Documentation**: Comprehensive with examples
+
+### Platform Support
+
+- iOS
+- Android
+- Web
+- Windows
+- macOS
+- Linux
+- WASM compatible
+
+### Package Structure
+
+- **username**: Dhia-Bechattaoui
+- **Dart SDK**: >=3.8.0
+- **Flutter**: >=3.32.0
+- **.gitignore**: Included
+- **CHANGELOG**: Included
+- Follows pub.dev publishing guidelines
 
 ## Contributing
 

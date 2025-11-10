@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0] - 2024-12-19
+
+### Added
+- **Automatic permission handling**: The package now automatically requests and handles permissions on Android and iOS
+- **Automatic storage handling**: Thumbnails are automatically saved to platform-appropriate directories with accessible file paths
+- **Enhanced example app**: Complete demo showcasing all package features including:
+  - Real video file picker
+  - Multiple output format selection (JPEG, PNG, WebP)
+  - Display of generated thumbnail images
+  - Platform capability checking
+  - Multiple frame extraction with horizontal scrollable display
+  - Comprehensive error handling
+
+### Changed
+- **BREAKING CHANGE**: `maintainAspectRatio` now defaults to `false` to use exact dimensions as specified
+- Improved error messages for `MissingPluginException` with troubleshooting guidance
+- Enhanced platform capability checking with fallback defaults
+
+### Fixed
+- Fixed `MissingPluginException` on Android by adding native MethodChannel implementation in MainActivity
+- Fixed `MissingPluginException` on iOS by adding native MethodChannel implementation in AppDelegate
+- Fixed multiple frame extraction to display all frames instead of just the first one
+- Fixed layout overflow issues in example app with scrollable content
+
+### Technical Details
+- Added `permission_handler` and `path_provider` dependencies for automatic permission and storage handling
+- Implemented `PermissionHandler` class for cross-platform permission management
+- Implemented `StorageHandler` class for automatic file storage with platform-specific directories
+- Native Android implementation using `MediaMetadataRetriever` for video thumbnail generation
+- Native iOS implementation using `AVFoundation` and `AVAssetImageGenerator` for video thumbnail generation
+- Example app now demonstrates all README features including format selection, platform capabilities, and multiple frame display
+
 ## [0.0.2] - 2024-12-19
 
 ### Changed

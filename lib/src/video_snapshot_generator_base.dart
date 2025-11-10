@@ -4,6 +4,8 @@ import 'package:cross_platform_video_thumbnails/cross_platform_video_thumbnails.
 import 'exceptions/thumbnail_exception.dart';
 import 'models/thumbnail_options.dart';
 import 'models/thumbnail_result.dart';
+import 'permission_handler.dart';
+import 'storage_handler.dart';
 
 /// A class for generating video snapshots and thumbnails.
 ///
@@ -25,12 +27,25 @@ class VideoSnapshotGenerator {
     required String videoPath,
     ThumbnailOptions? options,
   }) async {
-    final opts = options?.copyWith(videoPath: videoPath) ??
+    final opts =
+        options?.copyWith(videoPath: videoPath) ??
         ThumbnailOptions(videoPath: videoPath);
 
     try {
+      // Automatically request permissions if needed
+      await PermissionHandler.requestPermissions();
+
       // Initialize the cross-platform package
-      await cross_platform.CrossPlatformVideoThumbnails.initialize();
+      try {
+        await cross_platform.CrossPlatformVideoThumbnails.initialize();
+      } catch (e) {
+        // If initialization fails, throw a more helpful error
+        throw ThumbnailException(
+          'Failed to initialize video thumbnail plugin. '
+          'Make sure the plugin is properly installed and the app has been rebuilt. '
+          'Error: ${e.toString()}',
+        );
+      }
 
       // Convert our options to cross-platform format
       final crossPlatformOptions = _convertOptions(opts);
@@ -38,13 +53,35 @@ class VideoSnapshotGenerator {
       // Delegate to cross_platform_video_thumbnails
       final result =
           await cross_platform.CrossPlatformVideoThumbnails.generateThumbnail(
-        videoPath,
-        crossPlatformOptions,
+            videoPath,
+            crossPlatformOptions,
+          ).catchError((e) {
+            // Handle MissingPluginException specifically
+            if (e.toString().contains('MissingPluginException') ||
+                e.toString().contains('No implementation found')) {
+              throw ThumbnailException(
+                'Video thumbnail plugin is not available. '
+                'Please ensure:\n'
+                '1. The app has been rebuilt after adding the plugin\n'
+                '2. The plugin is properly registered in your platform configuration\n'
+                '3. You are running on a supported platform\n'
+                'Original error: ${e.toString()}',
+              );
+            }
+            throw e is Exception ? e : Exception(e.toString());
+          });
+
+      // Save the thumbnail data to a file automatically
+      final savedPath = await StorageHandler.saveThumbnail(
+        data: result.data,
+        format: _convertFormatBack(result.format),
+        videoPath: videoPath,
+        timeMs: opts.timeMs,
       );
 
       // Convert the result to our ThumbnailResult format
       return ThumbnailResult.success(
-        path: '', // cross-platform package returns data, not path
+        path: savedPath,
         width: result.width,
         height: result.height,
         dataSize: result.size,
@@ -75,14 +112,9 @@ class VideoSnapshotGenerator {
     final results = <ThumbnailResult>[];
 
     for (final timeMs in timePositions) {
-      final frameOptions = options?.copyWith(
-            videoPath: videoPath,
-            timeMs: timeMs,
-          ) ??
-          ThumbnailOptions(
-            videoPath: videoPath,
-            timeMs: timeMs,
-          );
+      final frameOptions =
+          options?.copyWith(videoPath: videoPath, timeMs: timeMs) ??
+          ThumbnailOptions(videoPath: videoPath, timeMs: timeMs);
 
       try {
         final result = await generateThumbnail(
@@ -107,23 +139,22 @@ class VideoSnapshotGenerator {
   ///
   /// Returns a [ThumbnailResult] containing the result of the operation.
   static Future<ThumbnailResult> generateThumbnailFromOptions(
-      ThumbnailOptions options) {
-    return generateThumbnail(
-      videoPath: options.videoPath,
-      options: options,
-    );
+    ThumbnailOptions options,
+  ) {
+    return generateThumbnail(videoPath: options.videoPath, options: options);
   }
 
   /// Converts our ThumbnailOptions to cross_platform_video_thumbnails format
   static cross_platform.ThumbnailOptions _convertOptions(
-      ThumbnailOptions options) {
+    ThumbnailOptions options,
+  ) {
     return cross_platform.ThumbnailOptions(
       timePosition: options.timeMs / 1000.0, // Convert milliseconds to seconds
       width: options.width,
       height: options.height,
       quality: options.quality / 100.0, // Convert 1-100 to 0.0-1.0
       format: _convertFormat(options.format),
-      maintainAspectRatio: true,
+      maintainAspectRatio: false, // Use exact dimensions as specified
     );
   }
 
@@ -161,13 +192,14 @@ class VideoSnapshotGenerator {
   static Future<bool> isVideoFormatSupported(String videoPath) async {
     await cross_platform.CrossPlatformVideoThumbnails.initialize();
     return cross_platform.CrossPlatformVideoThumbnails.isVideoFormatSupported(
-        videoPath);
+      videoPath,
+    );
   }
 
   /// Get the list of supported video formats for the current platform
   static List<String> getSupportedVideoFormats() {
-    return cross_platform.CrossPlatformVideoThumbnails
-        .getSupportedVideoFormats();
+    return cross_platform
+        .CrossPlatformVideoThumbnails.getSupportedVideoFormats();
   }
 
   /// Check if the current platform is available and ready to use
@@ -185,7 +217,8 @@ class VideoSnapshotGenerator {
 
   /// Converts cross_platform_video_thumbnails format to our format
   static ThumbnailFormat _convertFormatFromCrossPlatform(
-      cross_platform.ThumbnailFormat format) {
+    cross_platform.ThumbnailFormat format,
+  ) {
     switch (format) {
       case cross_platform.ThumbnailFormat.jpeg:
         return ThumbnailFormat.jpeg;

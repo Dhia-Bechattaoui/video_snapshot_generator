@@ -11,14 +11,13 @@ class ThumbnailResult {
   }) : errorMessage = null;
 
   /// Creates a [ThumbnailResult] for a failed operation.
-  const ThumbnailResult.error({
-    required this.errorMessage,
-  })  : path = '',
-        width = 0,
-        height = 0,
-        dataSize = 0,
-        format = null,
-        timeMs = null;
+  const ThumbnailResult.error({required this.errorMessage})
+    : path = '',
+      width = 0,
+      height = 0,
+      dataSize = 0,
+      format = null,
+      timeMs = null;
 
   /// The file path where the thumbnail was saved (empty if operation failed).
   final String path;
@@ -93,6 +92,13 @@ class ThumbnailResult {
   @override
   int get hashCode {
     return Object.hash(
-        path, width, height, dataSize, format, timeMs, errorMessage);
+      path,
+      width,
+      height,
+      dataSize,
+      format,
+      timeMs,
+      errorMessage,
+    );
   }
 }
