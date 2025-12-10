@@ -1,5 +1,4 @@
-import 'package:cross_platform_video_thumbnails/cross_platform_video_thumbnails.dart'
-    as cross_platform;
+import 'package:flutter/services.dart';
 
 import 'exceptions/thumbnail_exception.dart';
 import 'models/thumbnail_options.dart';
@@ -9,13 +8,17 @@ import 'storage_handler.dart';
 
 /// A class for generating video snapshots and thumbnails.
 ///
-/// This class provides methods to generate thumbnails from video files at specific
-/// time positions with customizable dimensions and quality settings.
+/// This class provides methods to generate thumbnails from video files at
+/// specific time positions with customizable dimensions and quality settings.
 ///
-/// This implementation uses cross_platform_video_thumbnails for full platform support
-/// including Android, iOS, Web, Windows, macOS, and Linux with WASM compatibility.
+/// This implementation provides full platform support including Android and
+/// iOS via native plugins, with direct method channel communication.
 class VideoSnapshotGenerator {
   VideoSnapshotGenerator._();
+
+  static const MethodChannel _channel = MethodChannel(
+    'video_snapshot_generator',
+  );
 
   /// Generates a thumbnail from a video file at the specified time position.
   ///
@@ -24,8 +27,8 @@ class VideoSnapshotGenerator {
   ///
   /// Returns a [ThumbnailResult] containing the result of the operation.
   static Future<ThumbnailResult> generateThumbnail({
-    required String videoPath,
-    ThumbnailOptions? options,
+    required final String videoPath,
+    final ThumbnailOptions? options,
   }) async {
     final opts =
         options?.copyWith(videoPath: videoPath) ??
@@ -35,79 +38,93 @@ class VideoSnapshotGenerator {
       // Automatically request permissions if needed
       await PermissionHandler.requestPermissions();
 
-      // Initialize the cross-platform package
-      try {
-        await cross_platform.CrossPlatformVideoThumbnails.initialize();
-      } catch (e) {
-        // If initialization fails, throw a more helpful error
-        throw ThumbnailException(
-          'Failed to initialize video thumbnail plugin. '
-          'Make sure the plugin is properly installed and the app has been rebuilt. '
-          'Error: ${e.toString()}',
-        );
-      }
+      // Prepare method arguments
+      final arguments = <String, dynamic>{
+        'videoPath': videoPath,
+        'timePosition': opts.timeMs / 1000.0, // Convert ms to seconds
+        'width': opts.width,
+        'height': opts.height,
+        'quality': opts.quality / 100.0, // Convert 1-100 to 0.0-1.0
+        'format': _formatToString(opts.format),
+        'maintainAspectRatio': false,
+      };
 
-      // Convert our options to cross-platform format
-      final crossPlatformOptions = _convertOptions(opts);
-
-      // Delegate to cross_platform_video_thumbnails
-      final result =
-          await cross_platform.CrossPlatformVideoThumbnails.generateThumbnail(
-            videoPath,
-            crossPlatformOptions,
-          ).catchError((e) {
+      // Call native method channel
+      final result = await _channel
+          .invokeMethod<Map<Object?, Object?>>('generateThumbnail', arguments)
+          .catchError((final Object e) {
             // Handle MissingPluginException specifically
-            if (e.toString().contains('MissingPluginException') ||
+            if (e is PlatformException ||
+                e.toString().contains('MissingPluginException') ||
                 e.toString().contains('No implementation found')) {
               throw ThumbnailException(
                 'Video thumbnail plugin is not available. '
                 'Please ensure:\n'
                 '1. The app has been rebuilt after adding the plugin\n'
-                '2. The plugin is properly registered in your platform configuration\n'
+                '2. The plugin is properly registered in your platform '
+                'configuration\n'
                 '3. You are running on a supported platform\n'
-                'Original error: ${e.toString()}',
+                'Original error: $e',
               );
             }
             throw e is Exception ? e : Exception(e.toString());
           });
 
+      if (result == null) {
+        throw const ThumbnailException(
+          'Failed to generate thumbnail: null result',
+        );
+      }
+
+      // Extract result data
+      final data = result['data'] as Uint8List?;
+      final width = result['width'] as int? ?? 0;
+      final height = result['height'] as int? ?? 0;
+      final format = result['format'] as String? ?? 'jpeg';
+      final timePosition = result['timePosition'] as double? ?? 0.0;
+
+      if (data == null) {
+        throw const ThumbnailException('Failed to generate thumbnail: no data');
+      }
+
       // Save the thumbnail data to a file automatically
       final savedPath = await StorageHandler.saveThumbnail(
-        data: result.data,
-        format: _convertFormatBack(result.format),
+        data: data,
+        format: format.toUpperCase(),
         videoPath: videoPath,
         timeMs: opts.timeMs,
       );
 
-      // Convert the result to our ThumbnailResult format
+      // Return result (convert seconds to milliseconds)
       return ThumbnailResult.success(
         path: savedPath,
-        width: result.width,
-        height: result.height,
-        dataSize: result.size,
-        format: _convertFormatBack(result.format),
-        timeMs: (result.timePosition * 1000)
-            .round(), // Convert seconds to milliseconds
+        width: width,
+        height: height,
+        dataSize: data.length,
+        format: format.toUpperCase(),
+        timeMs: (timePosition * 1000).round(),
       );
     } catch (e) {
       if (e is ThumbnailException) {
         rethrow;
       }
-      throw ThumbnailException('Error generating thumbnail: ${e.toString()}');
+      throw ThumbnailException('Error generating thumbnail: $e');
     }
   }
 
-  /// Generates multiple thumbnails from a video file at different time positions.
+  /// Generates multiple thumbnails from a video file at different time
+  /// positions.
   ///
   /// [videoPath] - The path to the video file
   /// [timePositions] - List of time positions in milliseconds
   /// [options] - Optional configuration for thumbnail generation
   ///
-  /// Returns a list of [ThumbnailResult] containing the results of the operations.
+  /// Returns a list of [ThumbnailResult] containing the results of the
+  /// operations.
   static Future<List<ThumbnailResult>> generateMultipleThumbnails({
-    required String videoPath,
-    required List<int> timePositions,
-    ThumbnailOptions? options,
+    required final String videoPath,
+    required final List<int> timePositions,
+    final ThumbnailOptions? options,
   }) async {
     final results = <ThumbnailResult>[];
 
@@ -122,7 +139,7 @@ class VideoSnapshotGenerator {
           options: frameOptions,
         );
         results.add(result);
-      } catch (e) {
+      } on Exception catch (e) {
         // Continue with other thumbnails even if one fails
         // Note: In production, consider using a proper logging framework
         // ignore: avoid_print
@@ -139,96 +156,53 @@ class VideoSnapshotGenerator {
   ///
   /// Returns a [ThumbnailResult] containing the result of the operation.
   static Future<ThumbnailResult> generateThumbnailFromOptions(
-    ThumbnailOptions options,
-  ) {
-    return generateThumbnail(videoPath: options.videoPath, options: options);
-  }
-
-  /// Converts our ThumbnailOptions to cross_platform_video_thumbnails format
-  static cross_platform.ThumbnailOptions _convertOptions(
-    ThumbnailOptions options,
-  ) {
-    return cross_platform.ThumbnailOptions(
-      timePosition: options.timeMs / 1000.0, // Convert milliseconds to seconds
-      width: options.width,
-      height: options.height,
-      quality: options.quality / 100.0, // Convert 1-100 to 0.0-1.0
-      format: _convertFormat(options.format),
-      maintainAspectRatio: false, // Use exact dimensions as specified
-    );
-  }
-
-  /// Converts our ThumbnailFormat to cross_platform_video_thumbnails format
-  static cross_platform.ThumbnailFormat _convertFormat(ThumbnailFormat format) {
-    switch (format) {
-      case ThumbnailFormat.jpeg:
-        return cross_platform.ThumbnailFormat.jpeg;
-      case ThumbnailFormat.png:
-        return cross_platform.ThumbnailFormat.png;
-      case ThumbnailFormat.webP:
-        return cross_platform.ThumbnailFormat.webp;
-    }
-    // This should never be reached as all enum values are covered
-    // ignore: dead_code
-    throw ArgumentError('Unsupported format: $format');
-  }
-
-  /// Converts cross_platform_video_thumbnails format back to our format
-  static String _convertFormatBack(cross_platform.ThumbnailFormat format) {
-    switch (format) {
-      case cross_platform.ThumbnailFormat.jpeg:
-        return 'JPEG';
-      case cross_platform.ThumbnailFormat.png:
-        return 'PNG';
-      case cross_platform.ThumbnailFormat.webp:
-        return 'WebP';
-    }
-    // This should never be reached as all enum values are covered
-    // ignore: dead_code
-    throw ArgumentError('Unsupported format: $format');
-  }
+    final ThumbnailOptions options,
+  ) => generateThumbnail(videoPath: options.videoPath, options: options);
 
   /// Check if the platform supports the given video format
-  static Future<bool> isVideoFormatSupported(String videoPath) async {
-    await cross_platform.CrossPlatformVideoThumbnails.initialize();
-    return cross_platform.CrossPlatformVideoThumbnails.isVideoFormatSupported(
-      videoPath,
-    );
+  static Future<bool> isVideoFormatSupported(final String videoPath) async {
+    try {
+      final result = await _channel.invokeMethod<bool>(
+        'isVideoFormatSupported',
+        <String, dynamic>{'videoPath': videoPath},
+      );
+      return result ?? false;
+    } on Exception {
+      return false;
+    }
   }
 
   /// Get the list of supported video formats for the current platform
-  static List<String> getSupportedVideoFormats() {
-    return cross_platform
-        .CrossPlatformVideoThumbnails.getSupportedVideoFormats();
-  }
+  static List<String> getSupportedVideoFormats() =>
+      // Return common video formats supported by most platforms
+      const ['mp4', 'mov', '3gp', 'avi', 'mkv', 'webm'];
 
   /// Check if the current platform is available and ready to use
   static Future<bool> isPlatformAvailable() async {
-    await cross_platform.CrossPlatformVideoThumbnails.initialize();
-    return cross_platform.CrossPlatformVideoThumbnails.isPlatformAvailable();
+    try {
+      final result = await _channel.invokeMethod<bool>('isPlatformAvailable');
+      return result ?? false;
+    } on Exception {
+      return false;
+    }
   }
 
   /// Get the list of supported output formats for the current platform
-  static List<ThumbnailFormat> getSupportedOutputFormats() {
-    final crossPlatformFormats =
-        cross_platform.CrossPlatformVideoThumbnails.getSupportedOutputFormats();
-    return crossPlatformFormats.map(_convertFormatFromCrossPlatform).toList();
-  }
+  static List<ThumbnailFormat> getSupportedOutputFormats() => const [
+    ThumbnailFormat.jpeg,
+    ThumbnailFormat.png,
+    ThumbnailFormat.webP,
+  ];
 
-  /// Converts cross_platform_video_thumbnails format to our format
-  static ThumbnailFormat _convertFormatFromCrossPlatform(
-    cross_platform.ThumbnailFormat format,
-  ) {
+  /// Converts ThumbnailFormat to string for method channel
+  static String _formatToString(final ThumbnailFormat format) {
     switch (format) {
-      case cross_platform.ThumbnailFormat.jpeg:
-        return ThumbnailFormat.jpeg;
-      case cross_platform.ThumbnailFormat.png:
-        return ThumbnailFormat.png;
-      case cross_platform.ThumbnailFormat.webp:
-        return ThumbnailFormat.webP;
+      case ThumbnailFormat.jpeg:
+        return 'jpeg';
+      case ThumbnailFormat.png:
+        return 'png';
+      case ThumbnailFormat.webP:
+        return 'webp';
     }
-    // This should never be reached as all enum values are covered
-    // ignore: dead_code
-    throw ArgumentError('Unsupported format: $format');
   }
 }

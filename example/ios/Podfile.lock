@@ -43,12 +43,15 @@ PODS:
     - SDWebImage/Core (= 5.21.3)
   - SDWebImage/Core (5.21.3)
   - SwiftyGif (5.4.5)
+  - video_snapshot_generator (0.1.0):
+    - Flutter
 
 DEPENDENCIES:
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - Flutter (from `Flutter`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
+  - video_snapshot_generator (from `.symlinks/plugins/video_snapshot_generator/ios`)
 
 SPEC REPOS:
   trunk:
@@ -66,6 +69,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
+  video_snapshot_generator:
+    :path: ".symlinks/plugins/video_snapshot_generator/ios"
 
 SPEC CHECKSUMS:
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
@@ -76,6 +81,7 @@ SPEC CHECKSUMS:
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   SDWebImage: 16309af6d214ba3f77a7c6f6fdda888cb313a50a
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
+  video_snapshot_generator: 1202f5c93e1014f89a1eb82c00da8204e3d434ee
 
 PODFILE CHECKSUM: 3c63482e143d1b91d2d2560aee9fb04ecc74ac7e
 

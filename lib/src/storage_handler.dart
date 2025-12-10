@@ -15,10 +15,10 @@ class StorageHandler {
   ///
   /// Returns the path to the saved file.
   static Future<String> saveThumbnail({
-    required List<int> data,
-    required String format,
-    String? videoPath,
-    int? timeMs,
+    required final List<int> data,
+    required final String format,
+    final String? videoPath,
+    final int? timeMs,
   }) async {
     try {
       // Get the appropriate directory for the current platform
@@ -45,13 +45,20 @@ class StorageHandler {
     }
   }
 
-  /// Gets the appropriate directory for storing thumbnails based on the platform.
+  /// Gets the appropriate directory for storing thumbnails based on the
+  /// platform.
   static Future<Directory> _getThumbnailDirectory() async {
     if (Platform.isAndroid || Platform.isIOS) {
       // For mobile platforms, use application documents directory
       final dir = await getApplicationDocumentsDirectory();
       final thumbnailDir = Directory(path.join(dir.path, 'thumbnails'));
+      // Directory.exists() and create() are necessary here for directory
+      // management and are only called once per app session.
+      // Directory.exists() is necessary for checking directory existence.
+      // ignore: avoid_slow_async_io
       if (!await thumbnailDir.exists()) {
+        // Directory.create() is necessary here for directory management.
+        // ignore: avoid_slow_async_io
         await thumbnailDir.create(recursive: true);
       }
       return thumbnailDir;
@@ -59,7 +66,12 @@ class StorageHandler {
       // For desktop platforms, use application support directory
       final dir = await getApplicationSupportDirectory();
       final thumbnailDir = Directory(path.join(dir.path, 'thumbnails'));
+      // Directory.exists() and create() are necessary here for directory
+      // management and are only called once per app session.
+      // ignore: avoid_slow_async_io
       if (!await thumbnailDir.exists()) {
+        // Directory.create() is necessary here for directory management.
+        // ignore: avoid_slow_async_io
         await thumbnailDir.create(recursive: true);
       }
       return thumbnailDir;
@@ -67,7 +79,12 @@ class StorageHandler {
       // For web, use temporary directory
       final dir = await getTemporaryDirectory();
       final thumbnailDir = Directory(path.join(dir.path, 'thumbnails'));
+      // Directory.exists() and create() are necessary here for directory
+      // management and are only called once per app session.
+      // ignore: avoid_slow_async_io
       if (!await thumbnailDir.exists()) {
+        // Directory.create() is necessary here for directory management.
+        // ignore: avoid_slow_async_io
         await thumbnailDir.create(recursive: true);
       }
       return thumbnailDir;
@@ -76,9 +93,9 @@ class StorageHandler {
 
   /// Generates a unique filename for the thumbnail.
   static String _generateFilename({
-    required String format,
-    String? videoPath,
-    int? timeMs,
+    required final String format,
+    final String? videoPath,
+    final int? timeMs,
   }) {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final videoName = videoPath != null
@@ -91,7 +108,7 @@ class StorageHandler {
   }
 
   /// Gets the file extension for the given format.
-  static String _getFileExtension(String format) {
+  static String _getFileExtension(final String format) {
     switch (format.toUpperCase()) {
       case 'JPEG':
       case 'JPG':

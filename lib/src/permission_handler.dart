@@ -17,14 +17,15 @@ class PermissionHandler {
 
       if (Platform.isAndroid) {
         // For Android, request storage permissions
-        // Android 13+ uses READ_MEDIA_VIDEO, older versions use READ_EXTERNAL_STORAGE
+        // Android 13+ uses READ_MEDIA_VIDEO, older versions use
+        // READ_EXTERNAL_STORAGE
         try {
           // Try videos permission first (Android 13+)
           final videosStatus = await Permission.videos.request();
           if (videosStatus.isGranted) {
             return true;
           }
-        } catch (e) {
+        } on Exception {
           // Videos permission might not be available on older Android versions
         }
 
@@ -32,7 +33,7 @@ class PermissionHandler {
         try {
           final storageStatus = await Permission.storage.request();
           return storageStatus.isGranted;
-        } catch (e) {
+        } on Exception {
           // If storage permission also fails, return true to allow operation
           // The underlying operation will handle permission errors
           return true;
@@ -45,17 +46,19 @@ class PermissionHandler {
           if (photosStatus.isDenied) {
             await Permission.photos.request();
           }
-        } catch (e) {
+        } on Exception {
           // If permission check fails, continue anyway
         }
         return true;
       }
 
-      // For desktop platforms (Windows, macOS, Linux), permissions are typically not needed
+      // For desktop platforms (Windows, macOS, Linux), permissions are
+      // typically not needed
       return true;
-    } catch (e) {
-      // If permission handling fails, return true to allow the operation to proceed
-      // The underlying operation will handle permission errors appropriately
+    } on Exception {
+      // If permission handling fails, return true to allow the operation to
+      // proceed. The underlying operation will handle permission errors
+      // appropriately.
       return true;
     }
   }
@@ -75,7 +78,7 @@ class PermissionHandler {
           if (videosStatus.isGranted) {
             return true;
           }
-        } catch (e) {
+        } on Exception {
           // Videos permission might not be available
         }
 
@@ -83,14 +86,14 @@ class PermissionHandler {
         try {
           final storageStatus = await Permission.storage.status;
           return storageStatus.isGranted;
-        } catch (e) {
+        } on Exception {
           return true; // Assume granted if check fails
         }
       }
 
       // For iOS and other platforms, assume permissions are available
       return true;
-    } catch (e) {
+    } on Exception {
       return true;
     }
   }

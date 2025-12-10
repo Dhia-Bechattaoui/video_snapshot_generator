@@ -1,4 +1,7 @@
+import 'package:flutter/foundation.dart';
+
 /// Result of a thumbnail generation or frame extraction operation.
+@immutable
 class ThumbnailResult {
   /// Creates a [ThumbnailResult] for a successful operation.
   const ThumbnailResult.success({
@@ -22,10 +25,12 @@ class ThumbnailResult {
   /// The file path where the thumbnail was saved (empty if operation failed).
   final String path;
 
-  /// The actual width of the generated thumbnail in pixels (0 if operation failed).
+  /// The actual width of the generated thumbnail in pixels (0 if operation
+  /// failed).
   final int width;
 
-  /// The actual height of the generated thumbnail in pixels (0 if operation failed).
+  /// The actual height of the generated thumbnail in pixels (0 if operation
+  /// failed).
   final int height;
 
   /// The size of the thumbnail file in bytes (0 if operation failed).
@@ -34,7 +39,8 @@ class ThumbnailResult {
   /// The format of the generated thumbnail (null if operation failed).
   final String? format;
 
-  /// The time position in milliseconds where the frame was extracted (null if operation failed).
+  /// The time position in milliseconds where the frame was extracted (null if
+  /// operation failed).
   final int? timeMs;
 
   /// Error message if the operation failed (null if operation succeeded).
@@ -45,13 +51,13 @@ class ThumbnailResult {
 
   /// Creates a copy of this [ThumbnailResult] with the given fields replaced.
   ThumbnailResult copyWith({
-    String? path,
-    int? width,
-    int? height,
-    int? dataSize,
-    String? format,
-    int? timeMs,
-    String? errorMessage,
+    final String? path,
+    final int? width,
+    final int? height,
+    final int? dataSize,
+    final String? format,
+    final int? timeMs,
+    final String? errorMessage,
   }) {
     if (errorMessage != null) {
       return ThumbnailResult.error(errorMessage: errorMessage);
@@ -69,16 +75,19 @@ class ThumbnailResult {
   @override
   String toString() {
     if (success) {
-      return 'ThumbnailResult.success(path: $path, width: $width, height: $height, '
-          'dataSize: $dataSize, format: $format, timeMs: $timeMs)';
+      return 'ThumbnailResult.success(path: $path, width: $width, '
+          'height: $height, dataSize: $dataSize, format: $format, '
+          'timeMs: $timeMs)';
     } else {
       return 'ThumbnailResult.error(errorMessage: $errorMessage)';
     }
   }
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
+  bool operator ==(final Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
     return other is ThumbnailResult &&
         other.path == path &&
         other.width == width &&
@@ -90,15 +99,6 @@ class ThumbnailResult {
   }
 
   @override
-  int get hashCode {
-    return Object.hash(
-      path,
-      width,
-      height,
-      dataSize,
-      format,
-      timeMs,
-      errorMessage,
-    );
-  }
+  int get hashCode =>
+      Object.hash(path, width, height, dataSize, format, timeMs, errorMessage);
 }

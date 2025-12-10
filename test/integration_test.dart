@@ -4,7 +4,7 @@ import 'package:video_snapshot_generator/video_snapshot_generator.dart';
 void main() {
   group('VideoSnapshotGenerator Integration Tests', () {
     testWidgets('should handle video frame extraction workflow', (
-      WidgetTester tester,
+      final tester,
     ) async {
       // Test the complete workflow of creating options and extracting frames
 
@@ -97,13 +97,10 @@ void main() {
     });
 
     testWidgets('should handle different thumbnail formats', (
-      WidgetTester tester,
+      final tester,
     ) async {
       // Test JPEG format
-      const jpegOptions = ThumbnailOptions(
-        videoPath: '/test/video.mp4',
-        format: ThumbnailFormat.jpeg,
-      );
+      const jpegOptions = ThumbnailOptions(videoPath: '/test/video.mp4');
 
       expect(jpegOptions.format, ThumbnailFormat.jpeg);
 
@@ -131,7 +128,7 @@ void main() {
     });
 
     testWidgets('should handle edge cases and boundary values', (
-      WidgetTester tester,
+      final tester,
     ) async {
       // Test minimum values
       const minOptions = ThumbnailOptions(
@@ -139,7 +136,6 @@ void main() {
         width: 1,
         height: 1,
         quality: 1,
-        timeMs: 0,
       );
 
       expect(minOptions.width, 1);
@@ -171,13 +167,9 @@ void main() {
       expect(defaultOptions.format, ThumbnailFormat.jpeg);
     });
 
-    testWidgets('should maintain immutability', (WidgetTester tester) async {
+    testWidgets('should maintain immutability', (final tester) async {
       // Test that original objects are not modified by copyWith
-      const originalOptions = ThumbnailOptions(
-        videoPath: '/test/video.mp4',
-        width: 320,
-        height: 240,
-      );
+      const originalOptions = ThumbnailOptions(videoPath: '/test/video.mp4');
 
       final copiedOptions = originalOptions.copyWith(width: 640, height: 480);
 

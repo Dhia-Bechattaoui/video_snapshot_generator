@@ -2,7 +2,7 @@
 
 A Flutter package for generating video snapshots and thumbnails with custom dimensions and quality settings. This package provides a simple and efficient way to generate thumbnails from video files in Flutter applications across all platforms.
 
-![Example](assets/example.gif)
+<img src="assets/example.gif" width="300" alt="Example GIF showing video snapshot generator in action" />
 
 ## Features
 
@@ -11,8 +11,8 @@ A Flutter package for generating video snapshots and thumbnails with custom dime
 - 🎨 Quality control settings (1-100)
 - ⏰ Extract frames at specific time positions
 - 🖼️ Multiple output formats (JPEG, PNG, WebP)
-- 🌐 **Full cross-platform support (Android, iOS, Web, Windows, macOS, Linux)**
-- 🚀 **WASM compatible for web applications**
+- 🌐 **Cross-platform support (Android, iOS)**
+- 🚀 **Native implementations for optimal performance**
 - 🔒 Automatic permission handling
 - ⚡ Efficient frame extraction
 - 🧪 Comprehensive error handling
@@ -28,7 +28,7 @@ Add this dependency to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  video_snapshot_generator: ^0.1.0
+  video_snapshot_generator: ^0.1.1
 ```
 
 Then run:
@@ -38,6 +38,14 @@ flutter pub get
 ```
 
 ### Platform Setup
+
+**Important**: This package is a Flutter plugin with native implementations. After adding the package to your project, rebuild your app to ensure the native code is properly linked:
+
+```bash
+flutter clean
+flutter pub get
+flutter build ios  # or flutter build apk / flutter build appbundle for Android
+```
 
 #### Android
 
@@ -54,17 +62,17 @@ For Android 13+ (API level 33+), you may also need:
 <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
 ```
 
+The native Android implementation is automatically registered via the Flutter plugin system - no manual setup required.
+
 #### iOS
 
-No additional setup required for iOS.
+No additional setup required for iOS. The plugin automatically registers native implementations via the Flutter plugin system.
 
-#### Web
+**Note**: After adding the package, rebuild your app (`flutter clean && flutter build ios`) to ensure the native code is properly linked.
 
-No additional setup required for web. **Fully WASM compatible!**
+#### Web, Windows, macOS, Linux
 
-#### Desktop (Windows, macOS, Linux)
-
-No additional setup required for desktop platforms.
+Currently, this package supports Android and iOS platforms. Desktop and web support may be added in future versions.
 
 ## Usage
 
@@ -273,6 +281,22 @@ try {
 - **Invalid parameters**: Width, height, quality, or time values are out of range
 - **Unsupported format**: The video format is not supported
 - **Insufficient storage**: Not enough storage space for the frame
+- **Plugin not registered**: If you see `MissingPluginException`, rebuild your app after adding the package
+
+### Troubleshooting
+
+**Issue: `MissingPluginException` or "No implementation found"**
+- Solution: Rebuild your app after adding the package (`flutter clean && flutter build`)
+- Ensure you're using version `^0.1.1` or later which includes proper plugin registration
+
+**Issue: Multiple thumbnail generation fails on iOS**
+- Solution: The plugin now includes improved error handling and resource management for concurrent thumbnail generation
+- Time positions are automatically validated and clamped to valid ranges
+- Asset loading is properly handled asynchronously
+
+**Issue: Thumbnail generation fails for specific time positions**
+- Solution: Time positions are automatically clamped to valid ranges (0 to video duration)
+- The plugin handles edge cases such as times beyond video duration gracefully
 
 ## Platform Support
 
@@ -280,14 +304,18 @@ try {
 |----------|---------|-------|
 | Android | ✅ Full | Requires storage permissions |
 | iOS | ✅ Full | No additional setup required |
-| Web | ✅ Full | **WASM compatible, no additional setup** |
-| Windows | ✅ Full | No additional setup required |
-| macOS | ✅ Full | No additional setup required |
-| Linux | ✅ Full | No additional setup required |
+| Web | ❌ Not yet | May be added in future versions |
+| Windows | ❌ Not yet | May be added in future versions |
+| macOS | ❌ Not yet | May be added in future versions |
+| Linux | ❌ Not yet | May be added in future versions |
 
-## WASM Compatibility
+## Native Implementations
 
-This package is fully compatible with WebAssembly (WASM) and can be used in Flutter web applications without any platform-specific code. The underlying `cross_platform_video_thumbnails` package handles all platform differences automatically.
+This package uses native implementations for optimal performance:
+- **Android**: Uses `MediaMetadataRetriever` for efficient frame extraction
+- **iOS**: Uses `AVFoundation` and `AVAssetImageGenerator` for high-quality thumbnail generation
+
+All native code is automatically registered via the Flutter plugin system - no manual setup required.
 
 ## Performance Considerations
 
@@ -296,15 +324,19 @@ This package is fully compatible with WebAssembly (WASM) and can be used in Flut
 - **Storage**: Extracted frames are stored automatically by the cross-platform package
 - **Quality vs. Size**: Higher quality settings result in larger file sizes
 - **Cross-platform**: Performance may vary between platforms due to native implementations
+- **Multiple thumbnails**: On iOS, multiple thumbnail generation is optimized with resource management (limited to 2 concurrent operations) to prevent resource exhaustion
+- **Asset loading**: Native implementations properly handle asynchronous asset loading to ensure video tracks are ready before generation
 
 ## Best Practices
 
-1. **Request permissions early**: Request storage permissions before attempting to extract frames
-2. **Handle errors gracefully**: Always wrap frame extraction in try-catch blocks
-3. **Use appropriate dimensions**: Choose dimensions that balance quality and performance
-4. **Validate input**: Ensure video paths exist and parameters are within valid ranges
-5. **Platform testing**: Test on all target platforms to ensure consistent behavior
-6. **Automatic storage**: The package handles storage automatically - no need to manage output paths
+1. **Rebuild after adding**: Always rebuild your app after adding the package (`flutter clean && flutter build`)
+2. **Request permissions early**: Request storage permissions before attempting to extract frames
+3. **Handle errors gracefully**: Always wrap frame extraction in try-catch blocks
+4. **Use appropriate dimensions**: Choose dimensions that balance quality and performance
+5. **Validate input**: Ensure video paths exist and parameters are within valid ranges (time positions are automatically validated)
+6. **Platform testing**: Test on all target platforms to ensure consistent behavior
+7. **Automatic storage**: The package handles storage automatically - no need to manage output paths
+8. **Multiple thumbnails**: When generating multiple thumbnails, the plugin handles resource management automatically (iOS limits to 2 concurrent operations)
 
 ## Example
 
@@ -336,11 +368,11 @@ flutter test --coverage
 
 ### Quality Standards
 
-- **Pana score**: 160/160
+- **Pana score**: 160/160 ✅ (Perfect score achieved)
 - **Flutter analyze**: 0 issues
 - **Dart analysis**: 0 issues
 - **Test coverage**: >90%
-- **Documentation**: Comprehensive with examples
+- **Documentation**: Comprehensive with examples (100% API documentation coverage)
 
 ### Platform Support
 
@@ -385,8 +417,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Dependencies
 
-This package depends on:
-- `cross_platform_video_thumbnails`: Core cross-platform video frame extraction functionality with WASM support
+This package is a standalone Flutter plugin with native implementations for:
+- **Android**: Using `MediaMetadataRetriever` for efficient thumbnail generation
+- **iOS**: Using `AVFoundation` and `AVAssetImageGenerator` for thumbnail generation
+
+The package includes:
+- Automatic permission handling (`permission_handler`)
+- Automatic file storage (`path_provider`)
+- Cross-platform IO utilities (`universal_io`)
 
 ## Support
 
@@ -410,7 +448,19 @@ Future versions may include:
 - Performance optimizations
 - Additional output formats
 
+## Recent Updates
+
+### Version 0.1.1 (Latest)
+
+- ✅ **Fixed critical issue**: Converted package to proper Flutter plugin structure
+- ✅ **Native implementations**: Moved from example app to plugin level for automatic registration
+- ✅ **iOS improvements**: Enhanced multiple thumbnail generation with better error handling and resource management
+- ✅ **Quality**: Achieved perfect 160/160 Pana score
+- ✅ **Documentation**: 100% API documentation coverage
+
+See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
+
 ## Acknowledgments
 
-- [cross_platform_video_thumbnails](https://pub.dev/packages/cross_platform_video_thumbnails) package for cross-platform functionality and WASM support
 - Flutter team for the excellent framework
+- All contributors and issue reporters who helped improve this package

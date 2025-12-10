@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2024-12-19
+
+### Fixed
+- **CRITICAL**: Fixed `MissingPluginException` by properly converting package to Flutter plugin structure
+- Moved native Android and iOS implementations from example app to plugin level
+- Native implementations are now automatically registered when the package is added to any Flutter app
+- Removed duplicate native code from example app that was causing confusion
+- Enhanced iOS multiple thumbnail generation with better error handling and resource management
+
+### Changed
+- **BREAKING**: Removed dependency on `cross_platform_video_thumbnails` - package is now standalone
+- Converted package from pure Dart package to proper Flutter plugin
+- Implemented direct method channel communication (removed wrapper dependency)
+- Changed method channel name from `cross_platform_video_thumbnails` to `video_snapshot_generator`
+- Native implementations now properly registered via plugin system instead of requiring manual setup
+- Example app now relies on plugin registration instead of custom native implementations
+- Platform support updated: Android and iOS only (web/desktop support may be added in future)
+
+### Technical Details
+- Created `android/src/main/kotlin/com/video_snapshot_generator/VideoSnapshotGeneratorPlugin.kt` with proper `FlutterPlugin` implementation
+- Created `ios/Classes/VideoSnapshotGeneratorPlugin.swift` with proper `FlutterPlugin` implementation
+- Added plugin configuration to `pubspec.yaml` with platform-specific plugin classes
+- Added `android/build.gradle` and `ios/video_snapshot_generator.podspec` for proper plugin structure
+- Replaced `cross_platform_video_thumbnails` wrapper with direct `MethodChannel` implementation
+- Example app `MainActivity.kt` and `AppDelegate.swift` now clean and rely on automatic plugin registration
+- Improved iOS thumbnail generation with asynchronous asset loading and resource management
+
 ## [0.1.0] - 2024-12-19
 
 ### Added

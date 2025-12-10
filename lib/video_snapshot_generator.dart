@@ -1,7 +1,8 @@
-/// A Flutter package for generating video thumbnails with custom dimensions and quality settings.
+/// A Flutter package for generating video thumbnails with custom dimensions
+/// and quality settings.
 ///
-/// This package provides a simple and efficient way to extract thumbnails from video files
-/// in Flutter applications across multiple platforms.
+/// This package provides a simple and efficient way to extract thumbnails
+/// from video files in Flutter applications across multiple platforms.
 ///
 /// ## Features
 ///
@@ -10,8 +11,8 @@
 /// - Quality control settings (1-100)
 /// - Extract thumbnails at specific time positions
 /// - Multiple output formats (JPEG, PNG, WebP)
-/// - Cross-platform support (Android, iOS, Web, Windows, macOS, Linux)
-/// - WASM compatible for web applications
+/// - Cross-platform support (Android, iOS)
+/// - Native implementations for optimal performance
 /// - Automatic permission handling
 /// - Efficient thumbnail generation
 /// - Comprehensive error handling

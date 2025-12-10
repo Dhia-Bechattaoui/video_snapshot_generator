@@ -1,6 +1,6 @@
 name: video_snapshot_generator
 description: Generate video thumbnails with custom dimensions and quality settings for Flutter applications.
-version: 0.1.0
+version: 0.1.1
 homepage: https://github.com/Dhia-Bechattaoui/video_snapshot_generator
 repository: https://github.com/Dhia-Bechattaoui/video_snapshot_generator
 issue_tracker: https://github.com/Dhia-Bechattaoui/video_snapshot_generator/issues
@@ -35,7 +35,6 @@ funding:
   - https://github.com/sponsors/Dhia-Bechattaoui
 
 dependencies:
-  cross_platform_video_thumbnails: ^0.1.1
   flutter:
     sdk: flutter
   path: ^1.9.1
@@ -53,4 +52,10 @@ dev_dependencies:
   test: ^1.0.0
 
 flutter:
-  # No Flutter-specific dependencies needed for this package
+  plugin:
+    platforms:
+      android:
+        package: com.video_snapshot_generator
+        pluginClass: VideoSnapshotGeneratorPlugin
+      ios:
+        pluginClass: VideoSnapshotGeneratorPlugin

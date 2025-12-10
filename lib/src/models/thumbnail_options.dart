@@ -1,4 +1,7 @@
+import 'package:flutter/foundation.dart';
+
 /// Configuration options for video thumbnail generation.
+@immutable
 class ThumbnailOptions {
   /// Creates [ThumbnailOptions] with the given parameters.
   const ThumbnailOptions({
@@ -35,32 +38,31 @@ class ThumbnailOptions {
 
   /// Creates a copy of this [ThumbnailOptions] with the given fields replaced.
   ThumbnailOptions copyWith({
-    String? videoPath,
-    int? width,
-    int? height,
-    int? quality,
-    int? timeMs,
-    ThumbnailFormat? format,
-  }) {
-    return ThumbnailOptions(
-      videoPath: videoPath ?? this.videoPath,
-      width: width ?? this.width,
-      height: height ?? this.height,
-      quality: quality ?? this.quality,
-      timeMs: timeMs ?? this.timeMs,
-      format: format ?? this.format,
-    );
-  }
+    final String? videoPath,
+    final int? width,
+    final int? height,
+    final int? quality,
+    final int? timeMs,
+    final ThumbnailFormat? format,
+  }) => ThumbnailOptions(
+    videoPath: videoPath ?? this.videoPath,
+    width: width ?? this.width,
+    height: height ?? this.height,
+    quality: quality ?? this.quality,
+    timeMs: timeMs ?? this.timeMs,
+    format: format ?? this.format,
+  );
 
   @override
-  String toString() {
-    return 'ThumbnailOptions(videoPath: $videoPath, width: $width, height: $height, '
-        'quality: $quality, timeMs: $timeMs, format: $format)';
-  }
+  String toString() =>
+      'ThumbnailOptions(videoPath: $videoPath, width: $width, height: $height, '
+      'quality: $quality, timeMs: $timeMs, format: $format)';
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
+  bool operator ==(final Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
     return other is ThumbnailOptions &&
         other.videoPath == videoPath &&
         other.width == width &&
@@ -71,9 +73,8 @@ class ThumbnailOptions {
   }
 
   @override
-  int get hashCode {
-    return Object.hash(videoPath, width, height, quality, timeMs, format);
-  }
+  int get hashCode =>
+      Object.hash(videoPath, width, height, quality, timeMs, format);
 }
 
 /// Supported thumbnail image formats.

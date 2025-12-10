@@ -33,11 +33,7 @@ void main() {
     });
 
     test('should copy ThumbnailOptions with new values', () {
-      const original = ThumbnailOptions(
-        videoPath: '/test/video.mp4',
-        width: 320,
-        height: 240,
-      );
+      const original = ThumbnailOptions(videoPath: '/test/video.mp4');
 
       final copied = original.copyWith(width: 640, quality: 90);
 
@@ -112,23 +108,9 @@ void main() {
     });
 
     test('should validate ThumbnailOptions equality', () {
-      const options1 = ThumbnailOptions(
-        videoPath: '/test/video.mp4',
-        width: 320,
-        height: 240,
-        quality: 75,
-        timeMs: 0,
-        format: ThumbnailFormat.jpeg,
-      );
+      const options1 = ThumbnailOptions(videoPath: '/test/video.mp4');
 
-      const options2 = ThumbnailOptions(
-        videoPath: '/test/video.mp4',
-        width: 320,
-        height: 240,
-        quality: 75,
-        timeMs: 0,
-        format: ThumbnailFormat.jpeg,
-      );
+      const options2 = ThumbnailOptions(videoPath: '/test/video.mp4');
 
       expect(options1, equals(options2));
       expect(options1.hashCode, equals(options2.hashCode));
